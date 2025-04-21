@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const db = require('./config/db');
+const expressLayouts = require('express-ejs-layouts');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,7 +12,10 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use(expressLayouts);
 app.set('view engine', 'ejs');
+app.set('layout', 'layout');
+app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', async (req, res) => {
@@ -21,15 +25,22 @@ app.get('/', async (req, res) => {
             []
         );
         
-        res.render('index', { companies: result.rows });
+        res.render('index', { 
+            companies: result.rows,
+            title: 'Welsh Biotech Companies'
+        });
     } catch (error) {
         console.error('Error:', error);
-        res.render('index', { companies: [], error: 'Failed to fetch companies' });
+        res.render('index', { 
+            companies: [], 
+            error: 'Failed to fetch companies',
+            title: 'Error - Welsh Biotech Companies'
+        });
     }
 });
 
 app.get('/submit', (req, res) => {
-    res.render('submit');
+    res.render('submit', { title: 'Submit Your Company' });
 });
 
 app.post('/submit', async (req, res) => {
@@ -53,7 +64,10 @@ app.post('/submit', async (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).render('error', { error: 'Something broke!' });
+    res.status(500).render('error', { 
+        error: 'Something broke!',
+        title: 'Error'
+    });
 });
 
 // Database connection test
