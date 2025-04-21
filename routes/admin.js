@@ -2,18 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { pool } = require('../config/db');
-
-// Middleware to check if user is authenticated
-const isAuthenticated = (req, res, next) => {
-    if (req.session.isAuthenticated) {
-        next();
-    } else {
-        res.redirect('/admin/login');
-    }
-};
+const { isAuthenticated } = require('../middleware/auth');
 
 // Admin login page
 router.get('/login', (req, res) => {
+    if (req.session.isAuthenticated) {
+        return res.redirect('/admin/dashboard');
+    }
     res.render('admin/login', { error: null });
 });
 
@@ -46,32 +41,44 @@ router.post('/login', async (req, res) => {
 
 // Admin logout
 router.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/admin/login');
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+        }
+        res.redirect('/admin/login');
+    });
 });
 
 // Admin dashboard
 router.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
-        const result = await pool.query(
-            'SELECT * FROM companies ORDER BY created_at DESC'
+        // Get pending and approved companies separately
+        const pendingResult = await pool.query(
+            'SELECT * FROM companies WHERE approved = false ORDER BY created_at DESC'
         );
+        const approvedResult = await pool.query(
+            'SELECT * FROM companies WHERE approved = true ORDER BY created_at DESC'
+        );
+        
         res.render('admin/dashboard', { 
-            companies: result.rows,
-            adminEmail: req.session.adminEmail
+            pendingCompanies: pendingResult.rows,
+            approvedCompanies: approvedResult.rows,
+            error: null,
+            success: req.query.success
         });
     } catch (error) {
         console.error('Dashboard error:', error);
         res.render('admin/dashboard', { 
-            companies: [],
+            pendingCompanies: [],
+            approvedCompanies: [],
             error: 'Error fetching companies',
-            adminEmail: req.session.adminEmail
+            success: null
         });
     }
 });
 
 // Approve company
-router.post('/approve/:id', isAuthenticated, async (req, res) => {
+router.post('/companies/:id/approve', isAuthenticated, async (req, res) => {
     const { id } = req.params;
     
     try {
@@ -79,23 +86,23 @@ router.post('/approve/:id', isAuthenticated, async (req, res) => {
             'UPDATE companies SET approved = true WHERE id = $1',
             [id]
         );
-        res.redirect('/admin/dashboard');
+        res.redirect('/admin/dashboard?success=Company approved successfully');
     } catch (error) {
         console.error('Approval error:', error);
-        res.status(500).json({ error: 'Error approving company' });
+        res.redirect('/admin/dashboard?error=Error approving company');
     }
 });
 
-// Reject/delete company
-router.post('/delete/:id', isAuthenticated, async (req, res) => {
+// Delete company
+router.post('/companies/:id/delete', isAuthenticated, async (req, res) => {
     const { id } = req.params;
     
     try {
         await pool.query('DELETE FROM companies WHERE id = $1', [id]);
-        res.redirect('/admin/dashboard');
+        res.redirect('/admin/dashboard?success=Company deleted successfully');
     } catch (error) {
         console.error('Delete error:', error);
-        res.status(500).json({ error: 'Error deleting company' });
+        res.redirect('/admin/dashboard?error=Error deleting company');
     }
 });
 
@@ -110,17 +117,16 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
         );
         
         if (result.rows.length === 0) {
-            return res.redirect('/admin/dashboard');
+            return res.redirect('/admin/dashboard?error=Company not found');
         }
         
         res.render('admin/edit', { 
             company: result.rows[0],
-            error: null,
-            adminEmail: req.session.adminEmail
+            error: null
         });
     } catch (error) {
         console.error('Edit page error:', error);
-        res.redirect('/admin/dashboard');
+        res.redirect('/admin/dashboard?error=Error loading company data');
     }
 });
 
@@ -138,14 +144,13 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             [name, oneliner, description, website, location, sector, contact_email, id]
         );
         
-        res.redirect('/admin/dashboard');
+        res.redirect('/admin/dashboard?success=Company updated successfully');
     } catch (error) {
         console.error('Update error:', error);
         const result = await pool.query('SELECT * FROM companies WHERE id = $1', [id]);
         res.render('admin/edit', {
             company: result.rows[0],
-            error: 'Error updating company',
-            adminEmail: req.session.adminEmail
+            error: 'Error updating company'
         });
     }
 });
