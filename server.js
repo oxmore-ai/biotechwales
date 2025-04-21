@@ -12,10 +12,14 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+// EJS setup
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
-app.set('layout', 'layout');
 app.set('views', path.join(__dirname, 'views'));
+app.set('layout extractScripts', true);
+app.set('layout extractStyles', true);
+app.set('layout', './layouts/main');
 
 // Routes
 app.get('/', async (req, res) => {
@@ -27,7 +31,8 @@ app.get('/', async (req, res) => {
         
         res.render('index', { 
             companies: result.rows,
-            title: 'Welsh Biotech Companies'
+            title: 'Welsh Biotech Companies',
+            success: req.query.success === 'true'
         });
     } catch (error) {
         console.error('Error:', error);
