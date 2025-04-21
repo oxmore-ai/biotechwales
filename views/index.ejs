@@ -25,13 +25,16 @@
         <% companies.forEach(company => { %>
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100">
-                    <div class="card-body">
+                    <div class="card-body text-center">
+                        <% if (company.logo_url) { %>
+                            <img src="<%= company.logo_url %>" alt="<%= company.name %> logo" class="company-logo mb-3">
+                        <% } else { %>
+                            <div class="company-logo bg-light rounded mb-3 mx-auto"></div>
+                        <% } %>
                         <h5 class="card-title"><%= company.name %></h5>
-                        <h6 class="card-subtitle mb-2 text-muted"><%= company.location %></h6>
-                        <p class="card-text"><%= company.description %></p>
-                        <div class="badge bg-info mb-2"><%= company.sector %></div>
-                    </div>
-                    <div class="card-footer bg-transparent">
+                        <p class="company-oneliner"><%= company.oneliner %></p>
+                        <div class="badge badge-sector mb-3"><%= company.sector %></div>
+                        <p class="text-muted small mb-3"><%= company.location %></p>
                         <a href="<%= company.website %>" class="btn btn-outline-primary btn-sm" target="_blank">Visit Website</a>
                     </div>
                 </div>

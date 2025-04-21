@@ -1,0 +1,123 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Admin Dashboard</h1>
+    <form action="/admin/logout" method="POST" class="m-0">
+        <button type="submit" class="btn btn-outline-primary">Sign Out</button>
+    </form>
+</div>
+
+<% if (locals.success) { %>
+    <div class="alert alert-success" role="alert">
+        <%= success %>
+    </div>
+<% } %>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Pending Approvals</h5>
+                <% if (pendingCompanies && pendingCompanies.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Logo</th>
+                                    <th>Company</th>
+                                    <th>One-liner</th>
+                                    <th>Location</th>
+                                    <th>Sector</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% pendingCompanies.forEach(company => { %>
+                                    <tr>
+                                        <td>
+                                            <% if (company.logo_url) { %>
+                                                <img src="<%= company.logo_url %>" alt="<%= company.name %> logo" width="40" height="40" style="object-fit: contain;">
+                                            <% } else { %>
+                                                <div class="bg-light rounded" style="width: 40px; height: 40px;"></div>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <strong><%= company.name %></strong><br>
+                                            <small class="text-muted"><%= company.website %></small>
+                                        </td>
+                                        <td><%= company.oneliner %></td>
+                                        <td><%= company.location %></td>
+                                        <td><span class="badge badge-sector"><%= company.sector %></span></td>
+                                        <td>
+                                            <div class="admin-actions">
+                                                <form action="/admin/companies/<%= company.id %>/approve" method="POST" class="m-0">
+                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                </form>
+                                                <form action="/admin/companies/<%= company.id %>/delete" method="POST" class="m-0">
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this company?')">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p class="text-muted mb-0">No pending approvals</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Approved Companies</h5>
+                <% if (approvedCompanies && approvedCompanies.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Logo</th>
+                                    <th>Company</th>
+                                    <th>One-liner</th>
+                                    <th>Location</th>
+                                    <th>Sector</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% approvedCompanies.forEach(company => { %>
+                                    <tr>
+                                        <td>
+                                            <% if (company.logo_url) { %>
+                                                <img src="<%= company.logo_url %>" alt="<%= company.name %> logo" width="40" height="40" style="object-fit: contain;">
+                                            <% } else { %>
+                                                <div class="bg-light rounded" style="width: 40px; height: 40px;"></div>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <strong><%= company.name %></strong><br>
+                                            <small class="text-muted"><%= company.website %></small>
+                                        </td>
+                                        <td><%= company.oneliner %></td>
+                                        <td><%= company.location %></td>
+                                        <td><span class="badge badge-sector"><%= company.sector %></span></td>
+                                        <td>
+                                            <form action="/admin/companies/<%= company.id %>/delete" method="POST" class="m-0">
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this company?')">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p class="text-muted mb-0">No approved companies</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div> 
