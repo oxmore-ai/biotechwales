@@ -1,0 +1,49 @@
+<%- include('layout') %>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Welsh Biotech Companies</h1>
+        <p class="lead">Discover innovative biotech companies based in Wales</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="/submit" class="btn btn-primary">Submit Your Company</a>
+    </div>
+</div>
+
+<% if (locals.error) { %>
+    <div class="alert alert-danger" role="alert">
+        <%= error %>
+    </div>
+<% } %>
+
+<% if (new URLSearchParams(global.url?.search).get('success') === 'true') { %>
+    <div class="alert alert-success" role="alert">
+        Thank you for submitting your company! It will be reviewed and added to the directory soon.
+    </div>
+<% } %>
+
+<div class="row g-4">
+    <% if (companies && companies.length > 0) { %>
+        <% companies.forEach(company => { %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= company.name %></h5>
+                        <h6 class="card-subtitle mb-2 text-muted"><%= company.location %></h6>
+                        <p class="card-text"><%= company.description %></p>
+                        <div class="badge bg-info mb-2"><%= company.sector %></div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="<%= company.website %>" class="btn btn-outline-primary btn-sm" target="_blank">Visit Website</a>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="col-12">
+            <div class="alert alert-info">
+                No companies have been added yet. Be the first to submit your company!
+            </div>
+        </div>
+    <% } %>
+</div> 

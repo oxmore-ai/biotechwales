@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS companies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    website VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    sector VARCHAR(100) NOT NULL,
+    contact_email VARCHAR(255) NOT NULL,
+    approved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+); 
