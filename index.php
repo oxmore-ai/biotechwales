@@ -12,7 +12,7 @@ $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch distinct locations for the filter dropdown
-$stmt = $pdo->query("SELECT DISTINCT location FROM entries WHERE location IS NOT NULL AND location != '' ORDER BY location");
+$stmt = $pdo->query("SELECT DISTINCT location FROM entries WHERE location IS NOT NULL AND location != '' AND status = 'published' ORDER BY location");
 $locations = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 // Build the query based on filters
