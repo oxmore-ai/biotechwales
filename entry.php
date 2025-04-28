@@ -84,7 +84,7 @@ $meta_description = htmlspecialchars(truncate_text($entry['description'], 160));
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: #000;
         }
         
         .logo {

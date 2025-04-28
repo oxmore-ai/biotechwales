@@ -112,7 +112,7 @@ $meta_description = "Contact the Biotech Wales team with your questions or feedb
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: #000;
         }
         
         .logo {

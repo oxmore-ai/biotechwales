@@ -98,7 +98,7 @@ $meta_description = "Directory of biotechnology companies and organizations in W
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: #000;
         }
         
         .logo {

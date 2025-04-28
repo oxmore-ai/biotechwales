@@ -53,6 +53,15 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Table: captcha_attempts
+CREATE TABLE IF NOT EXISTS captcha_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,
+    captcha_code VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    attempts INT DEFAULT 0,
+    INDEX (session_id)
+);
 
 -- Insert some example categories
 INSERT INTO categories (name) 
@@ -173,3 +182,8 @@ SELECT
     'Pembroke MedTech | Innovative Medical Device Technology for Rural Healthcare',
     'Pembroke MedTech designs and manufactures advanced diagnostic equipment and therapeutic devices optimized for rural healthcare settings in Wales.'
 WHERE NOT EXISTS (SELECT 1 FROM entries WHERE name = 'Pembroke MedTech');
+
+ALTER TABLE captcha_attempts
+    ADD COLUMN session_id VARCHAR(255) NOT NULL AFTER id,
+    ADD COLUMN captcha_code VARCHAR(10) NOT NULL AFTER session_id,
+    ADD COLUMN attempts INT DEFAULT 0 AFTER created_at;

@@ -1,12 +1,11 @@
 <?php
 // config.php - Database connection setup
 
-// Local development (MAMP default settings)
-$db_host = '127.0.0.1'; // Use IP instead of 'localhost'
-$db_user = 'root'; // Default MAMP username
-$db_password = 'root'; // Default MAMP password
+// Production
+$db_host = 'mysql-200-139.mysql.prositehosting.net'; // Use IP instead of 'localhost'
+$db_user = 'biotechadmin'; // Default MAMP username
+$db_password = 'bfy4VAGUDZ2Gx89vxfbp'; // Default MAMP password
 $db_db = 'directory_db'; // Change to your actual local database name
-$db_port = 8889; // MAMP default MySQL port
 
 // Create mysqli connection
 $mysqli = new mysqli($db_host, $db_user, $db_password, $db_db, $db_port);
