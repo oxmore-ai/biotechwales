@@ -1,0 +1,32 @@
+# Limit access to CAPTCHA images
+<FilesMatch "^captcha_.*\.png$">
+    # Allow access to the images
+    Order allow,deny
+    Allow from all
+    
+    # Set short expiration (10 minutes)
+    <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresByType image/png "access plus 10 minutes"
+    </IfModule>
+    
+    # Add cache control headers
+    <IfModule mod_headers.c>
+        Header set Cache-Control "max-age=600, must-revalidate"
+    </IfModule>
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Deny access to PHP files in this directory
+<FilesMatch "\.php$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Deny access to files with specified extensions
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|sql)$">
+    Order deny,allow
+    Deny from all
+</FilesMatch> 

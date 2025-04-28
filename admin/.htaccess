@@ -1,0 +1,37 @@
+# Prevent directory listing
+Options -Indexes
+
+# Protect against direct script access
+<FilesMatch "\.php$">
+    # Require authentication for direct access to PHP files
+    # Remove this if it interferes with your authentication system
+    # AuthType Basic
+    # AuthName "Restricted Area"
+    # AuthUserFile /path/to/.htpasswd
+    # Require valid-user
+</FilesMatch>
+
+# Additional security headers
+<IfModule mod_headers.c>
+    # Prevent browsers from detecting the MIME type
+    Header set X-Content-Type-Options "nosniff"
+    # Protect against clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    # Prevent XSS attacks
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "^\.ht|\.htpasswd|\.env|\.config|^\..*">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Redirect all direct access attempts to the admin login
+# Uncomment if you want to force all admin access through the login
+# RewriteEngine On
+# RewriteCond %{REQUEST_URI} ^/admin/.*$
+# RewriteCond %{REQUEST_URI} !^/admin/login.php$
+# RewriteCond %{THE_REQUEST} !admin/login.php
+# RewriteCond %{HTTP_COOKIE} !admin_logged_in=1
+# RewriteRule ^(.*)$ login.php [R=302,L] 
