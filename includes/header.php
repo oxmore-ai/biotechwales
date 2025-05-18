@@ -21,6 +21,11 @@ if (!isset($meta_description)) {
     <meta name="description" content="<?php echo htmlspecialchars($meta_description); ?>">
     <title><?php echo htmlspecialchars($title); ?></title>
     
+    <!-- Canonical URL -->
+    <?php if (isset($canonical_url)): ?>
+    <link rel="canonical" href="<?php echo htmlspecialchars($canonical_url); ?>">
+    <?php endif; ?>
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -33,7 +38,7 @@ if (!isset($meta_description)) {
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-black">
-        <div class="container">
+        <div class="container-fluid">
             <a class="navbar-brand" href="index.php">Biotech Wales</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

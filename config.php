@@ -4,7 +4,7 @@
 // Production
 $db_host = 'mysql-200-139.mysql.prositehosting.net'; // Use IP instead of 'localhost'
 $db_user = 'biotechadmin'; // Default MAMP username
-$db_password = 'bfy4VAGUDZ2Gx89vxfbp'; // Default MAMP password
+$db_password = ''; // Default MAMP password
 $db_db = 'directory_db'; // Change to your actual local database name
 
 // Create mysqli connection
