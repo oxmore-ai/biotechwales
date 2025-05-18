@@ -2,6 +2,7 @@
 require_once 'config.php';
 require_once 'includes/functions.php';
 require_once 'includes/captcha.php';
+require_once 'includes/header.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -28,7 +29,8 @@ $form_data = [
     'has_careers_page' => 0,
     'careers_url' => '',
     'has_press_page' => 0,
-    'press_url' => ''
+    'press_url' => '',
+    'logo_url' => ''
 ];
 
 // Define honeypot field for spam protection
@@ -55,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form_data['careers_url'] = filter_input(INPUT_POST, 'careers_url', FILTER_SANITIZE_URL);
     $form_data['has_press_page'] = isset($_POST['has_press_page']) ? 1 : 0;
     $form_data['press_url'] = filter_input(INPUT_POST, 'press_url', FILTER_SANITIZE_URL);
+    $form_data['logo_url'] = filter_input(INPUT_POST, 'logo_url', FILTER_SANITIZE_URL);
     
     // Check honeypot field (should be empty)
     if (!empty($_POST[$honeypot_field])) {
@@ -68,29 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Generate new CAPTCHA for retry
             $captcha_path = generate_captcha();
         } else {
-            // Process logo upload if provided
+            // Process logo URL if provided
             $logo_url = null;
-            if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
-                $temp_name = $_FILES['logo']['tmp_name'];
-                $file_name = $_FILES['logo']['name'];
-                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-                
-                // Only allow specific image formats
-                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                
-                if (in_array($file_ext, $allowed_extensions)) {
-                    // Create a unique filename
-                    $new_filename = uniqid('logo_') . '.' . $file_ext;
-                    $upload_path = __DIR__ . '/uploads/logos/' . $new_filename;
-                    
-                    // Move the uploaded file
-                    if (move_uploaded_file($temp_name, $upload_path)) {
-                        $logo_url = 'uploads/logos/' . $new_filename;
-                    } else {
-                        $error = "There was an error uploading your logo. Please try again.";
-                    }
-                } else {
-                    $error = "Invalid logo file format. Allowed formats: JPG, JPEG, PNG, GIF, WEBP.";
+            if (!empty($_POST['logo_url'])) {
+                $logo_url = filter_input(INPUT_POST, 'logo_url', FILTER_SANITIZE_URL);
+                if (!filter_var($logo_url, FILTER_VALIDATE_URL)) {
+                    $error = "Please enter a valid URL for your logo.";
                 }
             }
             
@@ -141,6 +127,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $form_data['press_url']
                         ]);
                         
+                        // Get category name for notification
+                        $category_stmt = $pdo->prepare("SELECT name FROM categories WHERE id = ?");
+                        $category_stmt->execute([$form_data['category_id']]);
+                        $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        // Prepare submission data for notification
+                        $submission_data = array_merge($form_data, [
+                            'category_name' => $category['name']
+                        ]);
+                        
+                        // Send notification email
+                        send_submission_notification($submission_data);
+                        
                         // Success!
                         $success = true;
                     } catch (PDOException $e) {
@@ -168,7 +167,6 @@ $meta_description = "Submit your biotech company or organization to the Biotech 
 // Set canonical URL
 $canonical_url = 'https://' . $_SERVER['HTTP_HOST'] . '/submit.php';
 
-require_once 'includes/header.php';
 ?>
 
 <body>
@@ -234,7 +232,7 @@ require_once 'includes/header.php';
                     Fields marked with <span class="form-required">*</span> are required.
                 </p>
                 
-                <form action="submit.php" method="post" enctype="multipart/form-data">
+                <form action="submit.php" method="post">
                     <div class="form-group">
                         <label for="name" class="form-label">Organization Name <span class="form-required">*</span></label>
                         <input type="text" class="form-input" id="name" name="name" required value="<?php echo htmlspecialchars($form_data['name']); ?>">
@@ -278,9 +276,13 @@ require_once 'includes/header.php';
                     </div>
                     
                     <div class="form-group">
-                        <label for="logo" class="form-label">Company Logo</label>
-                        <input type="file" class="form-input" id="logo" name="logo" accept="image/jpeg,image/png,image/gif,image/webp">
-                        <div class="form-hint">Recommended size: 300x300 pixels. Maximum file size: 2MB.</div>
+                        <label for="logo_url" class="form-label">Company Logo URL</label>
+                        <input type="url" class="form-input" id="logo_url" name="logo_url" value="<?php echo htmlspecialchars($form_data['logo_url'] ?? ''); ?>" placeholder="https://example.com/logo.png">
+                        <div class="form-hint">Enter the URL of your company logo. Recommended size: 300x300 pixels.</div>
+                        <div class="logo-preview-container" style="margin-top: 10px; display: none;">
+                            <p class="text-muted">Logo Preview:</p>
+                            <img id="logo-preview" src="" alt="Logo preview" style="max-height: 100px; max-width: 300px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
                     </div>
                     
                     <h4 class="form-section-title">Social Media</h4>
@@ -407,6 +409,18 @@ require_once 'includes/header.php';
                         emailField.classList.add('input-error');
                     }
                     
+                    // Validate logo URL format if provided
+                    const logoUrlField = document.getElementById('logo_url');
+                    if (logoUrlField && logoUrlField.value.trim()) {
+                        try {
+                            new URL(logoUrlField.value);
+                        } catch (e) {
+                            isValid = false;
+                            addErrorMessage(logoUrlField, 'Please enter a valid URL for your logo');
+                            logoUrlField.classList.add('input-error');
+                        }
+                    }
+                    
                     // If validation failed, prevent form submission
                     if (!isValid) {
                         e.preventDefault();
@@ -462,6 +476,44 @@ require_once 'includes/header.php';
             hamburger.addEventListener('click', function() {
                 navLinks.classList.toggle('open');
             });
+
+            // Logo preview functionality
+            const logoUrlField = document.getElementById('logo_url');
+            const logoPreview = document.getElementById('logo-preview');
+            const logoPreviewContainer = document.querySelector('.logo-preview-container');
+
+            if (logoUrlField && logoPreview && logoPreviewContainer) {
+                logoUrlField.addEventListener('input', function() {
+                    const url = this.value.trim();
+                    if (url) {
+                        try {
+                            new URL(url); // Validate URL format
+                            logoPreview.src = url;
+                            logoPreviewContainer.style.display = 'block';
+                            
+                            // Handle image load errors
+                            logoPreview.onerror = function() {
+                                logoPreviewContainer.style.display = 'none';
+                                addErrorMessage(logoUrlField, 'Could not load image from this URL');
+                                logoUrlField.classList.add('input-error');
+                            };
+                            
+                            // Clear error if image loads successfully
+                            logoPreview.onload = function() {
+                                const errorMsg = logoUrlField.parentNode.querySelector('.field-error');
+                                if (errorMsg) {
+                                    errorMsg.remove();
+                                    logoUrlField.classList.remove('input-error');
+                                }
+                            };
+                        } catch (e) {
+                            logoPreviewContainer.style.display = 'none';
+                        }
+                    } else {
+                        logoPreviewContainer.style.display = 'none';
+                    }
+                });
+            }
         });
     </script>
 </body>

@@ -21,10 +21,27 @@ if (!isset($meta_description)) {
     <meta name="description" content="<?php echo htmlspecialchars($meta_description); ?>">
     <title><?php echo htmlspecialchars($title); ?></title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/css/favicon.png">
+    
     <!-- Canonical URL -->
     <?php if (isset($canonical_url)): ?>
     <link rel="canonical" href="<?php echo htmlspecialchars($canonical_url); ?>">
     <?php endif; ?>
+    
+    <!-- Google Fonts - Lexend -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NECVJC64ZR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-NECVJC64ZR');
+    </script>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,56 +50,11 @@ if (!isset($meta_description)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-black">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">Biotech Wales</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">Home</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Categories
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
-                            <?php
-                            try {
-                                require_once 'config.php';
-                                $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
-                                while ($category = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    echo '<li><a class="dropdown-item" href="index.php?category=' . $category['id'] . '">' . 
-                                    htmlspecialchars($category['name']) . '</a></li>';
-                                }
-                            } catch (PDOException $e) {
-                                // Silently fail if database is not yet set up
-                            }
-                            ?>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="submit.php">Add to Directory</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="contact.php">Contact</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <?php if (isset($_SESSION['admin_id'])): ?>
-                        <a href="admin/index.php" class="btn btn-outline-light me-2">Admin Panel</a>
-                        <a href="admin/logout.php" class="btn btn-light">Logout</a>
-                    <?php else: ?>
-                        <a href="admin/login.php" class="btn btn-outline-light">Admin Login</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <!-- Main Content --> 
+
+</body>

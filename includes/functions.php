@@ -134,4 +134,47 @@ function upload_image($file) {
 function get_all_locations($pdo) {
     $stmt = $pdo->query("SELECT DISTINCT location FROM entries WHERE location IS NOT NULL AND location != '' ORDER BY location");
     return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+/**
+ * Send email notification for new submissions
+ * 
+ * @param array $submission_data The submission data
+ * @return bool True if email was sent successfully, false otherwise
+ */
+function send_submission_notification($submission_data) {
+    $to = 'biotech@oxmore.com'; // Admin email address
+    $subject = 'New Directory Submission - Biotech Wales';
+    
+    // Build email message
+    $message = "A new submission has been added to the Biotech Wales directory:\n\n";
+    $message .= "Organization: " . $submission_data['name'] . "\n";
+    $message .= "Category: " . $submission_data['category_name'] . "\n";
+    
+    if (!empty($submission_data['location'])) {
+        $message .= "Location: " . $submission_data['location'] . "\n";
+    }
+    
+    if (!empty($submission_data['email'])) {
+        $message .= "Email: " . $submission_data['email'] . "\n";
+    }
+    
+    if (!empty($submission_data['phone'])) {
+        $message .= "Phone: " . $submission_data['phone'] . "\n";
+    }
+    
+    if (!empty($submission_data['website_url'])) {
+        $message .= "Website: " . $submission_data['website_url'] . "\n";
+    }
+    
+    $message .= "\nDescription:\n" . $submission_data['description'] . "\n\n";
+    $message .= "View submission in admin panel: https://" . $_SERVER['HTTP_HOST'] . "/admin/submissions.php";
+    
+    // Set headers
+    $headers = "From: Biotech Wales <noreply@" . $_SERVER['HTTP_HOST'] . ">\r\n";
+    $headers .= "Reply-To: noreply@" . $_SERVER['HTTP_HOST'] . "\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion();
+    
+    // Send email
+    return mail($to, $subject, $message, $headers);
 } 

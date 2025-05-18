@@ -66,20 +66,7 @@ require_once 'includes/header.php';
     <meta name="description" content="<?php echo htmlspecialchars($meta_description); ?>">
     <title><?php echo htmlspecialchars($title); ?></title>
     
-    <!-- Google Fonts - Lexend -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NECVJC64ZR"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-NECVJC64ZR');
-    </script>
 </head>
 <body>
     <!-- HEADER BAR -->

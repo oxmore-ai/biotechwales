@@ -64,42 +64,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $location = filter_input(INPUT_POST, 'location', FILTER_SANITIZE_SPECIAL_CHARS);
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_SPECIAL_CHARS);
+    $logo_url = filter_input(INPUT_POST, 'logo_url', FILTER_SANITIZE_URL);
     
     // Validate required fields
     if (empty($name)) {
         $error = "Name is required.";
     } elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Please enter a valid email address.";
+    } elseif (!empty($logo_url) && !filter_var($logo_url, FILTER_VALIDATE_URL)) {
+        $error = "Please enter a valid URL for the company logo.";
     } else {
         try {
-            // Handle image upload if present
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $new_image_url = upload_image($_FILES['image']);
-                
-                if ($new_image_url) {
-                    // If upload successful, update image URL
-                    $image_url = $new_image_url;
-                }
-            }
-            
             // Prepare SQL statement based on whether adding or editing
             if ($id) {
                 // Update existing entry
                 $stmt = $pdo->prepare("
                     UPDATE entries 
                     SET name = ?, description = ?, category_id = ?, location = ?, 
-                        email = ?, phone = ?, image_url = ?
+                        email = ?, phone = ?, logo_url = ?
                     WHERE id = ?
                 ");
-                $stmt->execute([$name, $description, $category_id ?: null, $location, $email, $phone, $image_url, $id]);
+                $stmt->execute([$name, $description, $category_id ?: null, $location, $email, $phone, $logo_url, $id]);
                 $success = true;
             } else {
                 // Add new entry
                 $stmt = $pdo->prepare("
-                    INSERT INTO entries (name, description, category_id, location, email, phone, image_url)
+                    INSERT INTO entries (name, description, category_id, location, email, phone, logo_url)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ");
-                $stmt->execute([$name, $description, $category_id ?: null, $location, $email, $phone, $image_url]);
+                $stmt->execute([$name, $description, $category_id ?: null, $location, $email, $phone, $logo_url]);
                 $success = true;
                 
                 // Get the ID of the newly created entry
@@ -188,18 +181,12 @@ include 'includes/admin_header.php';
                             </div>
                             
                             <div class="col-md-6">
-                                <label for="image" class="form-label">Company Image</label>
-                                <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                                
-                                <?php if (!empty($image_url)): ?>
-                                <div class="mt-2">
-                                    <p class="text-muted">Current image:</p>
-                                    <img src="<?php echo htmlspecialchars('../' . $image_url); ?>" alt="Current image" class="img-thumbnail" style="max-height: 100px;">
-                                </div>
-                                <?php endif; ?>
-                                
-                                <div class="mt-2">
-                                    <img id="image-preview" src="#" alt="Image preview" class="img-thumbnail" style="max-height: 100px; display: none;">
+                                <label for="logo_url" class="form-label">Company Logo URL</label>
+                                <input type="url" class="form-control" id="logo_url" name="logo_url" value="<?php echo htmlspecialchars($entry['logo_url'] ?? ''); ?>" placeholder="https://example.com/logo.png">
+                                <div class="form-text">Enter the URL of your company logo. Recommended size: 300x300 pixels.</div>
+                                <div class="logo-preview-container" style="margin-top: 10px; display: none;">
+                                    <p class="text-muted">Logo Preview:</p>
+                                    <img id="logo-preview" src="" alt="Logo preview" class="img-thumbnail" style="max-height: 100px; max-width: 300px;">
                                 </div>
                             </div>
                         </div>
@@ -215,4 +202,48 @@ include 'includes/admin_header.php';
     </div>
 </div>
 
-<?php include 'includes/admin_footer.php'; ?> 
+<?php include 'includes/admin_footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logoUrlField = document.getElementById('logo_url');
+    const logoPreview = document.getElementById('logo-preview');
+    const logoPreviewContainer = document.querySelector('.logo-preview-container');
+
+    if (logoUrlField && logoPreview && logoPreviewContainer) {
+        // Show preview if there's an initial value
+        if (logoUrlField.value) {
+            logoPreview.src = logoUrlField.value;
+            logoPreviewContainer.style.display = 'block';
+        }
+
+        logoUrlField.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                try {
+                    new URL(url); // Validate URL format
+                    logoPreview.src = url;
+                    logoPreviewContainer.style.display = 'block';
+                    
+                    // Handle image load errors
+                    logoPreview.onerror = function() {
+                        logoPreviewContainer.style.display = 'none';
+                        this.classList.add('is-invalid');
+                    };
+                    
+                    // Clear error if image loads successfully
+                    logoPreview.onload = function() {
+                        this.classList.remove('is-invalid');
+                    };
+                } catch (e) {
+                    logoPreviewContainer.style.display = 'none';
+                }
+            } else {
+                logoPreviewContainer.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+</body>
+</html> 

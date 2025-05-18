@@ -41,7 +41,7 @@ $canonical_url = 'https://' . $_SERVER['HTTP_HOST'] . '/entry.php?id=' . $id;
 require_once 'includes/header.php';
 ?>
 
-<body>
+<body class="entry-page">
     <!-- HEADER BAR -->
     <div class="header-bar">
         <div class="header-content">
